@@ -1,5 +1,8 @@
 `parse_url($url)` function and `filter_var($url, FILTER_VALIDATE_URL)` are weak for parsing and validating purposes.
 
+Install:
+`composer require linkuha/uri:dev-master`
+
 Usage example:
 ```$xslt
 $myValidator = (new HttpValidator())
