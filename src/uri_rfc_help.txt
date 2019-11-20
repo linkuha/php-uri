@@ -1,0 +1,136 @@
+SHORT OF RFC 3986
+https://tools.ietf.org/html/rfc3986
+
+ foo://example.com:8042/over/there?name=ferret#nose
+   \_/   \______________/\_________/ \_________/ \__/
+    |           |            |            |        |
+ scheme     authority       path        query   fragment
+
+    US-ASCII
+    reserved    = gen-delims / sub-delims
+    gen-delims  = ":" / "/" / "?" / "#" / "[" / "]" / "@"
+    sub-delims  = "!" / "$" / "&" / "'" / "(" / ")" / "*" / "+" / "," / ";" / "="
+    unreserved  = ALPHA (%41-%5A and %61-%7A) / DIGIT (%30-%39) / "-" (%2D) / "." (%2E) / "_" (%5F) / "~" (%7E)
+
+Parse before percent encode!
+
+    URI         = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
+
+    scheme      = ALPHA *( ALPHA / DIGIT / "+" / "-" / "." )
+
+    hier-part   = "//" authority path-abempty
+                / path-absolute
+                / path-rootless
+                / path-empty
+
+    query       = *( pchar / "/" / "?" )
+
+query is indicated by the first ("?") and terminated by ("#") or by the end of the URI.
+
+    fragment    = *( pchar / "/" / "?" )
+
+    authority   = [ userinfo "@" ] host [ ":" port ]
+    [userinfo] + host + [port] = authority
+    userinfo    = *( unreserved / pct-encoded / sub-delims / ":" )
+    host        = IP-literal / IPv4address / registered name
+    reg-name    = *( unreserved / pct-encoded / sub-delims )
+
+reg-name should be not more than 255 letters
+
+    path          = path-abempty    ; begins with "/" or is empty
+    / path-absolute   ; begins with "/" but not "//"
+    / path-noscheme   ; begins with a non-colon segment
+    / path-rootless   ; begins with a segment
+    / path-empty      ; zero characters
+
+    path-abempty  = *( "/" segment )
+    path-absolute = "/" [ segment-nz *( "/" segment ) ]
+    path-noscheme = segment-nz-nc *( "/" segment )
+    path-rootless = segment-nz *( "/" segment )
+    path-empty    = 0<pchar>
+
+If a URI contains an authority component, then the path component
+   must either be empty or begin with a slash ("/") character.
+If a URI does not contain an authority component, then the path cannot begin
+with two slash characters ("//").
+
+A path segment that contains a colon character (e.g., "this:that")
+cannot be used as the first segment of a relative-path reference,
+as it would be mistaken for a scheme name. Such a segment must be
+preceded by a dot-segmet (e.g., "./this:that") to make a relative-
+path reference.
+
+    segment       = *pchar
+    segment-nz    = 1*pchar
+    segment-nz-nc = 1*( unreserved / pct-encoded / sub-delims / "@" )
+    ; non-zero-length segment without any colon ":"
+
+    pchar         = unreserved / pct-encoded / sub-delims / ":" / "@"
+
+    URI-reference = URI / relative-ref
+    URI = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
+
+    absolute-URI  = scheme ":" hier-part [ "?" query ]
+
+A base URI must conform to the <absolute-URI> syntax rule
+
+    relative-ref = relative-part [ "?" query ] [ "#" fragment ]
+
+    relative-part = ["/"] path
+
+A relative reference that begins with two slash characters is termed
+a network-path reference (use current scheme); such references are rarely used
+
+Non-ASCII characters must first be encoded according to UTF-8 [STD63], and then
+each octet of the corresponding UTF-8 sequence must be percent-
+encoded to be represented as URI characters.
+
+When a non-ASCII registered
+name represents an internationalized domain name intended for
+resolution via the DNS, the name must be transformed to the IDNA
+encoding [RFC3490] prior to name lookup,
+to maximize interoperability with legacy URI resolvers.
+
+File URI scheme can contain three slashes like 'file:///c/' with missing authority
+where 'file:///c/' equal to 'file://localhost/c/' (end-user's local context)
+"http" scheme considers a missing authority or empty host invalid.
+
+the scheme and hostname are case-insensitive, but paths and queries are not. // (CHECK)
+
+5.3.  Component Recomposition
+
+Parsed URI components can be recomposed to obtain the corresponding
+URI reference string.  Using pseudocode, this would be:
+
+   result = ""
+
+   if defined(scheme) then
+      append scheme to result;
+      append ":" to result;
+   endif;
+
+   if defined(authority) then
+      append "//" to result;
+      append authority to result;
+   endif;
+
+   append path to result;
+
+   if defined(query) then
+      append "?" to result;
+      append query to result;
+   endif;
+
+   if defined(fragment) then
+      append "#" to result;
+      append fragment to result;
+   endif;
+
+   return result;
+
+.
+
+Add info:
+https://doc.akka.io/docs/akka-http/current/common/uri-model.html (see parsing strict mode)
+
+

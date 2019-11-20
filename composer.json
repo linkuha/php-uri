@@ -1,0 +1,46 @@
+{
+  "name": "linkuha/uri",
+  "type": "library",
+  "description" : "Uri validator and fixer",
+  "keywords": [
+    "url",
+    "uri",
+    "rfc3986",
+    "rfc3987",
+    "parse_url",
+    "parser"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/linkuha/php-uri",
+  "authors": [
+    {
+      "name" : "Pudich Alexandr",
+      "email" : "linkuha@gmail.com",
+      "homepage" : "https://pudich.ru"
+    }
+  ],
+  "require": {
+    "php" : ">=5.6.0",
+    "lib-pcre": "*"
+  },
+  "require-dev": {
+  },
+  "autoload": {
+    "psr-4": {
+      "SimpleLibs\\Uri\\": "src"
+    },
+    "files": [
+      "polyfills/http_build_url.php"
+    ]
+  },
+  "autoload-dev": {
+  },
+  "suggest": {
+    "ext-intl" : "Allow parsing RFC3987 compliant hosts"
+  },
+  "scripts": {
+  },
+  "config": {
+    "sort-packages": true
+  }
+}
