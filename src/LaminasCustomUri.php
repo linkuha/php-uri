@@ -3,12 +3,13 @@
  * Created by PhpStorm.
  * User: linkuha (Pudich Aleksandr)
  * Date: 16.08.2019
- * Time: 17:50
  */
 
 namespace SimpleLibs\Uri;
 
-class ZendCustomUri extends \Zend\Uri\Http
+use Laminas\Uri\Http;
+
+class LaminasCustomUri extends Http
 {
     /**
      * @see Uri::$validSchemes
@@ -31,11 +32,11 @@ class ZendCustomUri extends \Zend\Uri\Http
     public function setPort($port)
     {
         if (($port !== null) && (! self::validatePort($port))) {
-            throw new \Zend\Uri\Exception\InvalidUriPartException(sprintf(
+            throw new \Laminas\Uri\Exception\InvalidUriPartException(sprintf(
                 'Port "%s" is not valid or is not accepted by %s',
                 $port,
                 get_class($this)
-            ), \Zend\Uri\Exception\InvalidUriPartException::INVALID_PORT);
+            ), \Laminas\Uri\Exception\InvalidUriPartException::INVALID_PORT);
         }
         $this->port = $port;
         return $this;
@@ -43,11 +44,11 @@ class ZendCustomUri extends \Zend\Uri\Http
 
     protected static function isValidDnsHostname($host)
     {
-        $validator = new \Zend\Validator\Hostname([
+        $validator = new \Laminas\Validator\Hostname([
             'allow' =>
-                \Zend\Validator\Hostname::ALLOW_DNS |
-                \Zend\Validator\Hostname::ALLOW_LOCAL |
-                \Zend\Validator\Hostname::ALLOW_IP
+                \Laminas\Validator\Hostname::ALLOW_DNS |
+                \Laminas\Validator\Hostname::ALLOW_LOCAL |
+                \Laminas\Validator\Hostname::ALLOW_IP
         ]);
 
         return $validator->isValid($host);

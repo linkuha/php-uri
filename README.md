@@ -4,22 +4,22 @@ Install:
 `composer require linkuha/uri:dev-master`
 
 Usage example:
-```$xslt
-$myValidator = (new HttpValidator())
+```
+$myParser = (new UriParser)
     ->allowLocalDomain()
     ->allowLocalIp()
     ->allowWithoutScheme()
     ->allowPunycode(true);
 
-$validStatus = true;
-$parsedParts = [];
+$myValidator = new HttpValidator($myParser);
+    
+$validStatus = $myValidator->validate($url);
+$parsedParts = $myValidator->getLastParts();
 
 if (! $myValidator->isSecure($url)) {
     $validStatus = false;
 }
-if (false === ($parsedParts = $myValidator->parseUrl($url))) {
-    $validStatus = false;
-}
+
 $fix = $myValidator->suggestFix($parsedParts);
 ```
 

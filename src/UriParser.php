@@ -185,27 +185,28 @@ class UriParser implements UriParserInterface
         $patternFull = '~^' .			// begin string
             '(?:(?P<scheme>' . self::SCHEME_PATTERN . '):)' .      // scheme [1]
             ( $this->allowWithoutScheme ? '?' : '' ) .
-            '(?://(?:(?P<userinfo>[^\s#?/]+(?::[^\s#?/]*)?)@)?' .    // (auth login:(password)) [2] // not RFC compliant, for workable usages
-            '(?:' .
-            ( $this->allowPunycode === false ?
-                '(?P<host>' . ($this->allowLocalDomain ? '(?:[a-z\x{00a1}-\x{fffff}0-9-_]{1,63}\.?)|' : '') . // host [3]
-                '(?:(?:[a-z\x{00a1}-\x{fffff}0-9-_]{1,63})' .
-                '(?:\.[a-z\x{00a1}-\x{fffff}0-9-_]{1,63})*' .
-                '(?:\.[a-z\x{00a1}-\x{fffff}]{1,63}\.?)' .		// TLD [4], in future may be need to add numbers support at TLD
-                '))'
-                :
-                // IDN support
-                '(?P<host>' . ($this->allowLocalDomain ?
-                    '(?:[a-z\x{00a1}-\x{fffff}0-9-_]{1,63}\.?)|' : '') . // host [3] (local - not UTF-8)
-                '(?:(?:xn--[a-z0-9\-]{1,59}|(?:[a-z\x{00a1}-\x{fffff}0-9-_]{1,63}))' .
-                '(?:\.(?:xn--[a-z0-9\-]{1,59}|[a-z\x{00a1}-\x{fffff}0-9-_]{1,63}))*' .
-                '(?:\.(?:xn--[a-z0-9\-]{1,59}|(?:[a-z\x{00a1}-\x{fffff}]{1,63}))\.?)' .        // TLD [4]
-                '))'
-            ) .
-            ( $this->allowIpv4 === false ? '' : '|(?P<ip4>' . self::regexpIpv4($this->allowLocalIp) . ')' ) .
-            ( $this->allowIpv6 === false ? '' : '|(?P<ip6>' . self::regexpIpv6() . ')' ) .
-            ')' .
-            '(?::(?P<port>\d{2,5})?)?)' .      // (port) [5]
+            '(?://' .
+                '(?:(?P<userinfo>[^\s#?/]+(?::[^\s#?/]*)?)@)?' .    // (auth login:(password)) [2] // not RFC compliant, for workable usages
+                '(?:' .
+                ( $this->allowPunycode === false ?
+                    '(?P<host>' . ($this->allowLocalDomain ? '(?:[a-z\x{00a1}-\x{fffff}0-9-_]{1,63}\.?)|' : '') . // host [3]
+                    '(?:(?:[a-z\x{00a1}-\x{fffff}0-9-_]{1,63})' .
+                    '(?:\.[a-z\x{00a1}-\x{fffff}0-9-_]{1,63})*' .
+                    '(?:\.[a-z\x{00a1}-\x{fffff}]{1,63}\.?)' .		// TLD [4], in future may be need to add numbers support at TLD
+                    '))'
+                    :
+                    // IDN support
+                    '(?P<host>' . ($this->allowLocalDomain ?
+                        '(?:[a-z\x{00a1}-\x{fffff}0-9-_]{1,63}\.?)|' : '') . // host [3] (local - not UTF-8)
+                    '(?:(?:xn--[a-z0-9\-]{1,59}|(?:[a-z\x{00a1}-\x{fffff}0-9-_]{1,63}))' .
+                    '(?:\.(?:xn--[a-z0-9\-]{1,59}|[a-z\x{00a1}-\x{fffff}0-9-_]{1,63}))*' .
+                    '(?:\.(?:xn--[a-z0-9\-]{1,59}|(?:[a-z\x{00a1}-\x{fffff}]{1,63}))\.?)' .        // TLD [4]
+                    '))'
+                ) .
+                ( $this->allowIpv4 === false ? '' : '|(?P<ip4>' . self::regexpIpv4($this->allowLocalIp) . ')' ) .
+                ( $this->allowIpv6 === false ? '' : '|(?P<ip6>' . self::regexpIpv6() . ')' ) .
+                ')' .
+                '(?::(?P<port>\d{2,5})?)?)' .      // (port) [5]
             ( $this->allowWithoutAuthority ? '?' : '') .
             '(?:(?P<segments>[/#?]{1}.*))?' .   // (path, fragment, query) [6]
             // path require but may be empty
@@ -218,6 +219,11 @@ class UriParser implements UriParserInterface
             if ($this->allowWithoutScheme && $this->allowWithoutAuthority) {
                 if (1 !== preg_match('~^(?:(?P<scheme>' . self::SCHEME_PATTERN . '):)(?:(?P<segments>.*))?~iuS', $uri, $matches)) {
                     $matches['segments'] = $uri;
+                }
+            } else if (! $this->allowWithoutAuthority) {
+                $nativeParts = parse_url($uri);
+                if (empty($nativeParts['host']) && ! empty($nativeParts['path']) && 0 !== mb_strpos($nativeParts['path'], '/')) {
+                    return $this->parse("//$uri");
                 }
             } else {
                 return false;
@@ -273,6 +279,7 @@ class UriParser implements UriParserInterface
             }
         }
 //        var_dump($uriParts);
+
         return $uriParts;
     }
 }

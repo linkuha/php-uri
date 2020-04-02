@@ -22,7 +22,7 @@ class HttpValidator extends AbstractValidator
 
     protected $allowRelative = false;
 
-    public function __construct($allowRelative = false, UriParserInterface $parser = null)
+    public function __construct(UriParserInterface $parser = null, $allowRelative = false)
     {
         $this->allowRelative = $allowRelative;
         parent::__construct($parser);
