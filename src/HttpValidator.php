@@ -91,8 +91,8 @@ class HttpValidator extends AbstractValidator
         return true;
     }
 
-    // aka normalize
-    public function suggestFix(array $parts)
+    // akka normalize
+    public static function suggestFix(array $parts)
     {
         // TODO when absolute ^//
         if (! is_array($parts)) {
@@ -152,12 +152,6 @@ class HttpValidator extends AbstractValidator
             $parts['fragment'] = UriHelper::formatQueryAndFragment($parts['fragment']);
         }
         return \http_build_url($parts);
-    }
-
-
-    public function isValidHost($host)
-    {
-        // TODO
     }
 
 
